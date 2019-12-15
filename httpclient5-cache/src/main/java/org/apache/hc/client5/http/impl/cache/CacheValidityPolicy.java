@@ -43,14 +43,14 @@ import org.apache.hc.core5.util.TimeValue;
 
 class CacheValidityPolicy {
 
-    public static final long MAX_AGE = 2147483648L;
+    public static final TimeValue MAX_AGE = TimeValue.ofSeconds(2147483648L);
 
     CacheValidityPolicy() {
         super();
     }
 
     public TimeValue getCurrentAge(final HttpCacheEntry entry, final Date now) {
-        return TimeValue.ofMilliseconds(getCorrectedInitialAge(entry).toMillis() + getResidentTime(entry, now).toMillis());
+        return TimeValue.ofSeconds(getCorrectedInitialAge(entry).toSeconds() + getResidentTime(entry, now).toSeconds());
     }
 
     public TimeValue getFreshnessLifetime(final HttpCacheEntry entry) {
@@ -73,7 +73,7 @@ class CacheValidityPolicy {
     }
 
     public boolean isResponseFresh(final HttpCacheEntry entry, final Date now) {
-        return (getCurrentAge(entry, now).compareTo(getFreshnessLifetime(entry)) == -1);
+        return getCurrentAge(entry, now).compareTo(getFreshnessLifetime(entry)) == -1;
     }
 
     /**
@@ -92,7 +92,7 @@ class CacheValidityPolicy {
      */
     public boolean isResponseHeuristicallyFresh(final HttpCacheEntry entry,
             final Date now, final float coefficient, final TimeValue defaultLifetime) {
-        return (getCurrentAge(entry, now).compareTo(getHeuristicFreshnessLifetime(entry, coefficient, defaultLifetime)) == -1);
+        return getCurrentAge(entry, now).compareTo(getHeuristicFreshnessLifetime(entry, coefficient, defaultLifetime)) == -1;
     }
 
     public TimeValue getHeuristicFreshnessLifetime(final HttpCacheEntry entry,
@@ -199,7 +199,7 @@ class CacheValidityPolicy {
     protected TimeValue getApparentAge(final HttpCacheEntry entry) {
         final Date dateValue = entry.getDate();
         if (dateValue == null) {
-            return TimeValue.ofSeconds(MAX_AGE);
+            return MAX_AGE;
         }
         final long diff = entry.getResponseDate().getTime() - dateValue.getTime();
         if (diff < 0L) {
@@ -216,10 +216,10 @@ class CacheValidityPolicy {
             try {
                 hdrAge = Long.parseLong(hdr.getValue());
                 if (hdrAge < 0) {
-                    hdrAge = MAX_AGE;
+                    hdrAge = MAX_AGE.toSeconds();
                 }
             } catch (final NumberFormatException nfe) {
-                hdrAge = MAX_AGE;
+                hdrAge = MAX_AGE.toSeconds();
             }
             ageValue = (hdrAge > ageValue) ? hdrAge : ageValue;
         }
@@ -284,7 +284,7 @@ class CacheValidityPolicy {
         if (age.compareTo(freshness) <= 0) {
             return TimeValue.ZERO_MILLISECONDS;
         }
-        return TimeValue.ofMilliseconds(age.toMillis() - freshness.toMillis());
+        return TimeValue.ofSeconds(age.toSeconds() - freshness.toSeconds());
     }
 
 
