@@ -85,7 +85,7 @@ class CachedResponseSuitabilityChecker {
         if (maxStale == -1) {
             return false;
         }
-        return (maxStale > validityStrategy.getStalenessSecs(entry, now));
+        return (maxStale > validityStrategy.getStaleness(entry, now));
     }
 
     private boolean originInsistsOnFreshness(final HttpCacheEntry entry) {
@@ -187,7 +187,7 @@ class CachedResponseSuitabilityChecker {
             if (HeaderConstants.CACHE_CONTROL_MAX_AGE.equals(elt.getName())) {
                 try {
                     final int maxAge = Integer.parseInt(elt.getValue());
-                    if (validityStrategy.getCurrentAgeSecs(entry, now) > maxAge) {
+                    if (validityStrategy.getCurrentAge(entry, now) > maxAge) {
                         log.debug("Response from cache was not suitable due to max age");
                         return false;
                     }
@@ -201,7 +201,7 @@ class CachedResponseSuitabilityChecker {
             if (HeaderConstants.CACHE_CONTROL_MAX_STALE.equals(elt.getName())) {
                 try {
                     final int maxStale = Integer.parseInt(elt.getValue());
-                    if (validityStrategy.getFreshnessLifetimeSecs(entry) > maxStale) {
+                    if (validityStrategy.getFreshnessLifetime(entry) > maxStale) {
                         log.debug("Response from cache was not suitable due to max stale freshness");
                         return false;
                     }
@@ -218,8 +218,8 @@ class CachedResponseSuitabilityChecker {
                     if (minFresh < 0L) {
                         return false;
                     }
-                    final long age = validityStrategy.getCurrentAgeSecs(entry, now);
-                    final long freshness = validityStrategy.getFreshnessLifetimeSecs(entry);
+                    final long age = validityStrategy.getCurrentAge(entry, now);
+                    final long freshness = validityStrategy.getFreshnessLifetime(entry);
                     if (freshness - age < minFresh) {
                         log.debug("Response from cache was not suitable due to min fresh " +
                                 "freshness requirement");

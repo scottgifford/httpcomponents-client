@@ -1676,7 +1676,7 @@ public abstract class TestCachingExecChain {
 
     private void entryHasStaleness(final long staleness) {
         expect(
-            mockValidityPolicy.getStalenessSecs((HttpCacheEntry) anyObject(), (Date) anyObject()))
+            mockValidityPolicy.getStaleness((HttpCacheEntry) anyObject(), (Date) anyObject()))
             .andReturn(staleness);
     }
 

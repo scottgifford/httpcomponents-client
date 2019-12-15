@@ -112,7 +112,7 @@ public class TestCachedHttpResponseGenerator {
 
         final SimpleHttpResponse response = impl.generateResponse(request, entry);
 
-        verify(mockValidityPolicy).getCurrentAgeSecs(same(entry), isA(Date.class));
+        verify(mockValidityPolicy).getCurrentAge(same(entry), isA(Date.class));
 
         final Header ageHdr = response.getFirstHeader("Age");
         Assert.assertNotNull(ageHdr);
@@ -125,7 +125,7 @@ public class TestCachedHttpResponseGenerator {
 
         final SimpleHttpResponse response = impl.generateResponse(request, entry);
 
-        verify(mockValidityPolicy).getCurrentAgeSecs(same(entry), isA(Date.class));
+        verify(mockValidityPolicy).getCurrentAge(same(entry), isA(Date.class));
 
         final Header ageHdr = response.getFirstHeader("Age");
         Assert.assertNull(ageHdr);
@@ -137,7 +137,7 @@ public class TestCachedHttpResponseGenerator {
 
         final SimpleHttpResponse response = impl.generateResponse(request, entry);
 
-        verify(mockValidityPolicy).getCurrentAgeSecs(same(entry), isA(Date.class));
+        verify(mockValidityPolicy).getCurrentAge(same(entry), isA(Date.class));
 
         final Header ageHdr = response.getFirstHeader("Age");
         Assert.assertNotNull(ageHdr);
@@ -146,7 +146,7 @@ public class TestCachedHttpResponseGenerator {
 
     private void currentAge(final long sec) {
         when(
-                mockValidityPolicy.getCurrentAgeSecs(same(entry),
+                mockValidityPolicy.getCurrentAge(same(entry),
                         isA(Date.class))).thenReturn(sec);
     }
 

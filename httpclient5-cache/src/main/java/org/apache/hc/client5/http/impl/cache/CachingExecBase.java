@@ -189,7 +189,7 @@ public class CachingExecBase {
             cachedResponse = responseGenerator.generateResponse(request, entry);
         }
         setResponseStatus(context, CacheResponseStatus.CACHE_HIT);
-        if (validityPolicy.getStalenessSecs(entry, now) > 0L) {
+        if (validityPolicy.getStaleness(entry, now) > 0L) {
             cachedResponse.addHeader(HeaderConstants.WARNING,"110 localhost \"Response is stale\"");
         }
         return cachedResponse;
@@ -248,8 +248,8 @@ public class CachingExecBase {
             if (HeaderConstants.CACHE_CONTROL_MAX_STALE.equals(elt.getName())) {
                 try {
                     final int maxStale = Integer.parseInt(elt.getValue());
-                    final long age = validityPolicy.getCurrentAgeSecs(entry, now);
-                    final long lifetime = validityPolicy.getFreshnessLifetimeSecs(entry);
+                    final long age = validityPolicy.getCurrentAge(entry, now);
+                    final long lifetime = validityPolicy.getFreshnessLifetime(entry);
                     if (age - lifetime > maxStale) {
                         return true;
                     }

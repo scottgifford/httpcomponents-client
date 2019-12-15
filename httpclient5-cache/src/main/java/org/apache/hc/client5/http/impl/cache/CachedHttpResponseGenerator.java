@@ -78,7 +78,7 @@ class CachedHttpResponseGenerator {
             response.setBodyBytes(content, contentType);
         }
 
-        final long age = this.validityStrategy.getCurrentAgeSecs(entry, now);
+        final long age = this.validityStrategy.getCurrentAge(entry, now);
         if (age > 0) {
             if (age >= Integer.MAX_VALUE) {
                 response.setHeader(HeaderConstants.AGE, "2147483648");
