@@ -159,7 +159,7 @@ public class BenchmarkHttpByteArrayCacheEntrySerializer {
         System.out.printf("%40s: %6d runs in %7.3f ms, %7.3f ms/run%n", testName, runs, nanoToFractionalMilli(elapsed), nanoToFractionalMilli(each));
     }
 
-    private static final double nanoToFractionalMilli(long ns) {
+    private static final double nanoToFractionalMilli(final long ns) {
         return ns /1000000.0;
     }
 }
