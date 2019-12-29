@@ -64,7 +64,10 @@ public class BenchmarkHttpByteArrayCacheEntrySerializer {
     @Test
     public void fileTestBenchmark() throws Exception {
         final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
-        cacheObjectValues.resource = new FileResource(makeTestFileObject(TEST_CONTENT_FILE_NAME));
+        final File testFile = makeTestFileObject(TEST_CONTENT_FILE_NAME);
+        // Turn this into a heap resource for a fair benchmark comparison.
+        final byte[] testBytes = readFullyStrict(new FileInputStream(testFile), (int) testFile.length());
+        cacheObjectValues.resource = new HeapResource(testBytes);
         final HttpCacheStorageEntry testEntry = cacheObjectValues.toEntry();
 
         benchmarkSerializeDeserialize(newCacheName + " file object", testEntry, serializer);
