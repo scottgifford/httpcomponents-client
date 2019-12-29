@@ -149,7 +149,7 @@ public class BenchmarkHttpByteArrayCacheEntrySerializer {
         }
 
         final long start = System.nanoTime();
-        final int runs = 5000;
+        final int runs = 50000;
         for(int i=0;i<runs;i++) {
             func.run();
         }
