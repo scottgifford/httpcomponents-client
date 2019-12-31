@@ -395,6 +395,13 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
         return variantMap;
     }
 
+    /**
+     * Copy bytes from the given source buffer to the given output stream until end-of-file is reached.
+     *
+     * @param src Input source
+     * @param dest Output destination
+     * @throws IOException if an I/O error occurs
+     */
     private static void copyBytes(final SessionInputBuffer src, final OutputStream dest) throws IOException {
         final byte[] buf = new byte[BUFFER_SIZE];
         int lastBytesRead;
@@ -403,6 +410,17 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
         }
     }
 
+    /**
+     * Copy the given number of bytes from the given source buffer to the given buffer.
+     *
+     * If end-of-file is reached before the given number of bytes have been read, and IOException will be thrown.
+     *
+     * @param src Input source
+     * @param dest Output destination
+     * @param destPos Position in destination buffer to start writing
+     * @param length Number of bytes to copy into the buffer
+     * @throws IOException if an I/O error occurs or the file is smaller than length
+     */
     private static void copyBytes(final InputStream src, final byte[] dest, final int destPos, final int length) throws IOException {
         int totalBytesRead = 0;
         int lastBytesRead;
