@@ -145,6 +145,9 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
                     // We don't use this metrics object but it's required
                     final HttpTransportMetricsImpl metrics = new HttpTransportMetricsImpl();
 
+                    // Use the default, ASCII-only encoder for HTTP protocol and header values
+                    // It's the only thing that's widely used, and it's not worth any extra effort
+                    // to support anything else.
                     final SessionOutputBufferImpl outputBuffer = new SessionOutputBufferImpl(metrics, BUFFER_SIZE);
                     outputBuffer.bind(out);
                     final AbstractMessageWriter<HttpResponse> httpResponseWriter = makeHttpResponseWriter(outputBuffer);
