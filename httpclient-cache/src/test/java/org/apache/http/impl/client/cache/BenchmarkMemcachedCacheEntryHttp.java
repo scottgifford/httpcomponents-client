@@ -43,7 +43,7 @@ import org.junit.Test;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.buildSimpleTestObjectFromTemplate;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.makeTestFileObject;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.memcachedCacheEntryFromBytes;
-import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.readFully;
+import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.readFullyStrict;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.verifyHttpCacheEntryFromBytes;
 
 public class BenchmarkMemcachedCacheEntryHttp {
@@ -88,7 +88,7 @@ public class BenchmarkMemcachedCacheEntryHttp {
         final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
         final File testFile = makeTestFileObject(TEST_CONTENT_FILE_NAME);
         // Turn this into a heap resource, otherwise the Java serializer doesn't serialize the whole body.
-        final byte[] testBytes = readFully(new FileInputStream(testFile), (int) testFile.length());
+        final byte[] testBytes = readFullyStrict(new FileInputStream(testFile), (int) testFile.length());
         cacheObjectValues.put("resource", new HeapResource(testBytes));
         final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
         final MemcachedCacheEntryFactory factory = new MemcachedCacheEntryFactoryImpl();

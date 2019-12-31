@@ -58,7 +58,7 @@ import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.makeMockSlowReadResource;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.makeTestFileObject;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.memcachedCacheEntryFromBytes;
-import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.readFully;
+import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.readFullyStrict;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.readTestFileBytes;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.testWithCache;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.verifyHttpCacheEntryFromTestFile;
@@ -332,7 +332,7 @@ public class TestMemcachedCacheEntryHttp {
         final byte[] testBytes = testMemcachedEntry.toByteArray();
 
         final MemcachedCacheEntry verifyMemcachedCacheEntryFromBytes = memcachedCacheEntryFromBytes(cacheEntryFactory, testBytes);
-        final byte[] verifyBytes = readFully(verifyMemcachedCacheEntryFromBytes.getHttpCacheEntry().getResource().getInputStream(),
+        final byte[] verifyBytes = readFullyStrict(verifyMemcachedCacheEntryFromBytes.getHttpCacheEntry().getResource().getInputStream(),
                 (int)verifyMemcachedCacheEntryFromBytes.getHttpCacheEntry().getResource().length());
 
         assertEquals(testString, new String(verifyBytes, "UTF-8"));
