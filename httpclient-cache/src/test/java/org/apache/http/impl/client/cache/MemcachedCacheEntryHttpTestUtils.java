@@ -224,14 +224,20 @@ class MemcachedCacheEntryHttpTestUtils {
                     expected.getVariantMap().get(key), actual.getVariantMap().get(key));
         }
 
-        // Would love a cleaner way to do this if anybody knows of one
-        assertEquals(expected.getAllHeaders().length, actual.getAllHeaders().length);
-        for (int i = 0; i < expected.getAllHeaders().length; i++) {
-            final Header actualHeader = actual.getAllHeaders()[i];
-            final Header expectedHeader = expected.getAllHeaders()[i];
+        // Verify that the same headers are present on the expected and actual content.
+        for(final Header expectedHeader: expected.getAllHeaders()) {
+            final Header actualHeader = expected.getFirstHeader(expectedHeader.getName());
 
-            assertEquals(expectedHeader.getName(), actualHeader.getName());
-            assertEquals(expectedHeader.getValue(), actualHeader.getValue());
+            if (actualHeader == null) {
+                if (expectedHeader.getName().equalsIgnoreCase("content-length")) {
+                    // This header is added by the cache implementation, and can be safely ignored
+                } else {
+                    fail("Expected header " + expectedHeader.getName() + " was not found");
+                }
+            } else {
+                assertEquals(expectedHeader.getName(), actualHeader.getName());
+                assertEquals(expectedHeader.getValue(), actualHeader.getValue());
+            }
         }
 
         if (expected.getResource() == null) {

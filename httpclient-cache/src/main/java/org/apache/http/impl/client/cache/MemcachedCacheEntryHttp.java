@@ -60,7 +60,6 @@ import org.apache.http.impl.io.SessionOutputBufferImpl;
 import org.apache.http.io.SessionInputBuffer;
 import org.apache.http.io.SessionOutputBuffer;
 import org.apache.http.message.BasicHttpRequest;
-import org.apache.http.protocol.HTTP;
 
 /**
  * Cache serializer and deserializer that uses an HTTP-like format.
@@ -118,14 +117,6 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
 
                     final ByteArrayOutputStream out = new ByteArrayOutputStream();
                     addResource(out);
-
-                    // The response generator will add Content-Length if it doesn't already exist
-                    // Remove the generated one...
-                    httpResponse.removeHeaders(HTTP.CONTENT_LEN);
-                    // ...and add in the original if it was present
-                    if (httpCacheEntry.getHeaders(HTTP.CONTENT_LEN).length >= 1) {
-                        httpResponse.addHeader(httpCacheEntry.getFirstHeader(HTTP.CONTENT_LEN));
-                    }
 
                     escapeHeaders(httpResponse);
                     addMetadataPseudoHeaders(httpResponse);
