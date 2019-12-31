@@ -45,7 +45,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.cache.HeaderConstants;
 import org.apache.http.client.cache.HttpCacheEntry;
 import org.apache.http.client.cache.Resource;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -111,7 +110,8 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
                     final HttpRequestWrapper requestWrapper = HttpRequestWrapper.wrap(httpRequest);
 
                     // This is the package-private class that requires us to be package-private
-                    final CachedHttpResponseGenerator cachedHttpResponseGenerator = new CachedHttpResponseGenerator();
+                    final CacheValidityPolicy cacheValidityPolicy = new NoAgeCacheValidityPolicy();
+                    final CachedHttpResponseGenerator cachedHttpResponseGenerator = new CachedHttpResponseGenerator(cacheValidityPolicy);
 
                     final CloseableHttpResponse httpResponse = cachedHttpResponseGenerator.generateResponse(requestWrapper, httpCacheEntry);
                     addResource(httpResponse);
@@ -119,8 +119,6 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
                     final ByteArrayOutputStream out = new ByteArrayOutputStream();
                     addResource(out);
 
-                    // The response generator will add an age header, which doesn't make sense to cache
-                    httpResponse.removeHeaders(HeaderConstants.AGE);
                     // The response generator will add Content-Length if it doesn't already exist
                     // Remove the generated one...
                     httpResponse.removeHeaders(HTTP.CONTENT_LEN);
@@ -480,6 +478,19 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Cache validity policy that always returns an age of 0.
+     *
+     * This prevents the Age header from being written to the cache (it does not make sense to cache it),
+     * and is the only thing the policy is used for in this case.
+     */
+    private class NoAgeCacheValidityPolicy extends CacheValidityPolicy {
+        @Override
+        public long getCurrentAgeSecs(final HttpCacheEntry entry, final Date now) {
+            return 0L;
         }
     }
 }
