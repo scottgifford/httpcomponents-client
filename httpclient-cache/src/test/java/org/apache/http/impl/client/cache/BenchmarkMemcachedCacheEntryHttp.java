@@ -113,7 +113,7 @@ public class BenchmarkMemcachedCacheEntryHttp {
         final byte[] testBytes = memcachedCacheEntry.toByteArray();
 
         // Verify once to make sure everything is right, and maybe warm things up a little
-        verifyHttpCacheEntryFromBytes(storageKey, testEntry, factory, testBytes);
+        verifyHttpCacheEntryFromBytes(factory, storageKey, testEntry, testBytes);
 
         System.out.printf("%40s: %6d bytes\n", testName + " serialized size", testBytes.length);
 

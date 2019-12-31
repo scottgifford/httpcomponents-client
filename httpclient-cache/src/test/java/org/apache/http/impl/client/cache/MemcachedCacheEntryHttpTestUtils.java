@@ -81,8 +81,7 @@ class MemcachedCacheEntryHttpTestUtils {
                 });
         final Map<String, String> variantMap = getOrDefault(template, "variantMap",
                 new HashMap<String, String>());
-        final String requestMethod = getOrDefault(template, "requestMethod", null);
-        return new HttpCacheEntry(requestDate, responseDate, statusLine, responseHeaders, resource, variantMap, requestMethod);
+        return new HttpCacheEntry(requestDate, responseDate, statusLine, responseHeaders, resource, variantMap);
     }
 
     /**
@@ -109,12 +108,12 @@ class MemcachedCacheEntryHttpTestUtils {
      * <p>
      * Compares fields to ensure the deserialized object is equivalent to the original object.
      *
+     * @param cacheEntryFactory Factory for creating serializers
      * @param storageKey        Storage key to serialize and deserialize
      * @param httpCacheEntry    Original object to serialize and test against
-     * @param cacheEntryFactory Factory for creating serializers
      * @throws Exception if anything goes wrong
      */
-    static void testWithCache(final String storageKey, final HttpCacheEntry httpCacheEntry, final MemcachedCacheEntryFactory cacheEntryFactory) throws Exception {
+    static void testWithCache(final MemcachedCacheEntryFactory cacheEntryFactory, final String storageKey, final HttpCacheEntry httpCacheEntry) throws Exception {
         final MemcachedCacheEntry memcachedCacheEntry = cacheEntryFactory.getMemcachedCacheEntry(storageKey, httpCacheEntry);
 
         final HttpCacheEntry testHttpCacheEntry = memcachedCacheEntry.getHttpCacheEntry();
@@ -126,19 +125,19 @@ class MemcachedCacheEntryHttpTestUtils {
 //        System.out.println(testString);
 //        System.out.printf("Cache entry is %d bytes\n", testBytes.length);
 
-        verifyHttpCacheEntryFromBytes(storageKey, httpCacheEntry, cacheEntryFactory, testBytes);
+        verifyHttpCacheEntryFromBytes(cacheEntryFactory, storageKey, httpCacheEntry, testBytes);
     }
 
     /**
      * Verify that the given bytes deserialize to the given storage key and an equivalent cache entry.
      *
+     * @param cacheEntryFactory Deserializer factory
      * @param storageKey        Storage key to verify
      * @param httpCacheEntry    Cache entry to verify
-     * @param cacheEntryFactory Deserializer factory
      * @param testBytes         Bytes to deserialize
      * @throws Exception if anything goes wrong
      */
-    static void verifyHttpCacheEntryFromBytes(final String storageKey, final HttpCacheEntry httpCacheEntry, final MemcachedCacheEntryFactory cacheEntryFactory, final byte[] testBytes) throws Exception {
+    static void verifyHttpCacheEntryFromBytes(final MemcachedCacheEntryFactory cacheEntryFactory, final String storageKey, final HttpCacheEntry httpCacheEntry, final byte[] testBytes) throws Exception {
         final MemcachedCacheEntry testMemcachedCacheEntryFromBytes = memcachedCacheEntryFromBytes(cacheEntryFactory, testBytes);
 
         assertEquals(storageKey, testMemcachedCacheEntryFromBytes.getStorageKey());
@@ -164,7 +163,7 @@ class MemcachedCacheEntryHttpTestUtils {
 
         final byte[] bytes = readTestFileBytes(testFileName);
 
-        verifyHttpCacheEntryFromBytes(storageKey, httpCacheEntry, cacheEntryFactory, bytes);
+        verifyHttpCacheEntryFromBytes(cacheEntryFactory, storageKey, httpCacheEntry, bytes);
     }
 
     /**
@@ -212,7 +211,6 @@ class MemcachedCacheEntryHttpTestUtils {
     static void assertCacheEntriesEqual(final HttpCacheEntry expected, final HttpCacheEntry actual) throws Exception {
         assertEquals(expected.getRequestDate(), actual.getRequestDate());
         assertEquals(expected.getResponseDate(), actual.getResponseDate());
-        assertEquals(expected.getRequestMethod(), actual.getRequestMethod());
 
         assertEquals(expected.getStatusLine().getProtocolVersion(), actual.getStatusLine().getProtocolVersion());
         assertEquals(expected.getStatusLine().getReasonPhrase(), actual.getStatusLine().getReasonPhrase());
@@ -362,7 +360,7 @@ class MemcachedCacheEntryHttpTestUtils {
             int curPos = 0;
 
             @Override
-            public Integer answer(final InvocationOnMock invocationOnMock) throws Throwable {
+            public Integer answer(final InvocationOnMock invocationOnMock) {
                 final boolean hasArguments = invocationOnMock.getArguments().length > 0;
                 final byte[] outBuf = hasArguments ? invocationOnMock.getArgumentAt(0, byte[].class) : new byte[1];
                 final int outPos = hasArguments ? invocationOnMock.getArgumentAt(1, Integer.class) : 0;
