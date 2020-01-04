@@ -67,7 +67,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class TestMemcachedCacheEntryHttp {
-    private static final String SERIALIZED = ".serialized";
+    private static final String SERIALIZED = ".httpbytes.serialized";
 
     private static final String FILE_TEST_SERIALIZED_NAME = "ApacheLogo" + SERIALIZED;
     private static final String SIMPLE_OBJECT_SERIALIZED_NAME = "simpleObject" + SERIALIZED;
