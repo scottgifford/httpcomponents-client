@@ -29,9 +29,6 @@ package org.apache.http.impl.client.cache;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.http.client.cache.HttpCacheEntry;
 import org.apache.http.impl.client.cache.memcached.MemcachedCacheEntry;
@@ -40,7 +37,7 @@ import org.apache.http.impl.client.cache.memcached.MemcachedCacheEntryFactoryImp
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.buildSimpleTestObjectFromTemplate;
+import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.HttpCacheStorageEntryTestTemplate;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.makeTestFileObject;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.memcachedCacheEntryFromBytes;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.readFullyStrict;
@@ -61,23 +58,25 @@ public class BenchmarkMemcachedCacheEntryHttp {
 
     @Test
     public void simpleTestBenchmark() throws Exception {
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(Collections.<String, Object>emptyMap());
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         benchmarkSerializeDeserialize(newCacheName + " simple object", TEST_STORAGE_KEY, testEntry, cacheEntryFactory);
     }
 
     @Test
     public void fileTestBenchmark() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("resource", new FileResource(makeTestFileObject(TEST_CONTENT_FILE_NAME)));
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.resource = new FileResource(makeTestFileObject(TEST_CONTENT_FILE_NAME));
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         benchmarkSerializeDeserialize(newCacheName + " file object", TEST_STORAGE_KEY, testEntry, cacheEntryFactory);
     }
 
     @Test
     public void oldSimpleTestBenchmark() throws Exception {
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(Collections.<String, Object>emptyMap());
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
         final MemcachedCacheEntryFactory factory = new MemcachedCacheEntryFactoryImpl();
 
         benchmarkSerializeDeserialize("Java simple object", TEST_STORAGE_KEY, testEntry, factory);
@@ -85,12 +84,12 @@ public class BenchmarkMemcachedCacheEntryHttp {
 
     @Test
     public void oldFileTestBenchmark() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
         final File testFile = makeTestFileObject(TEST_CONTENT_FILE_NAME);
         // Turn this into a heap resource, otherwise the Java serializer doesn't serialize the whole body.
         final byte[] testBytes = readFullyStrict(new FileInputStream(testFile), (int) testFile.length());
-        cacheObjectValues.put("resource", new HeapResource(testBytes));
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        cacheObjectValues.resource = new HeapResource(testBytes);
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
         final MemcachedCacheEntryFactory factory = new MemcachedCacheEntryFactoryImpl();
 
         benchmarkSerializeDeserialize("Java file object", TEST_STORAGE_KEY, testEntry, factory);

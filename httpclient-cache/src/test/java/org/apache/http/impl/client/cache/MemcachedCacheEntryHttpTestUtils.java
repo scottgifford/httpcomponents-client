@@ -34,8 +34,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.http.Header;
@@ -60,47 +60,78 @@ class MemcachedCacheEntryHttpTestUtils {
     private final static String TEST_RESOURCE_DIR = "src/test/resources/";
 
     /**
-     * Create a new HttpCacheEntry object with default fields, except for those overridden by name in the template.
-     *
-     * @param template Map of field names to override in the test object
-     * @return New object for testing
+     * Template for incrementally building a new HttpCacheStorageEntry test object, starting from defaults.
      */
-    static HttpCacheEntry buildSimpleTestObjectFromTemplate(final Map<String, Object> template) {
-        final Resource resource = getOrDefault(template, "resource",
-                new HeapResource("Hello World".getBytes(Charset.forName("UTF-8"))));
+    static class HttpCacheStorageEntryTestTemplate {
+        Resource resource;
+        Date requestDate;
+        Date responseDate;
+        StatusLine statusLine;
+        Header[] responseHeaders;
+        Map<String, String> variantMap;
 
-        final Date requestDate = getOrDefault(template, "requestDate", new Date(165214800000L));
-        final Date responseDate = getOrDefault(template, "responseDate", new Date(2611108800000L));
-        final StatusLine statusLine = getOrDefault(template, "statusLine",
-                new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1),
-                        200, "OK"));
-        final Header[] responseHeaders = getOrDefault(template, "headers",
-                new Header[]{
-                        new BasicHeader("Content-type", "text/html"),
-                        new BasicHeader("Cache-control", "public, max-age=31536000"),
-                });
-        final Map<String, String> variantMap = getOrDefault(template, "variantMap",
-                new HashMap<String, String>());
-        return new HttpCacheEntry(requestDate, responseDate, statusLine, responseHeaders, resource, variantMap);
+        /**
+         * Return a new HttpCacheStorageEntryTestTemplate instance with all default values.
+         *
+         * @return new HttpCacheStorageEntryTestTemplate instance
+         */
+        static HttpCacheStorageEntryTestTemplate makeDefault() {
+            return new HttpCacheStorageEntryTestTemplate(DEFAULT_HTTP_CACHE_STORAGE_ENTRY_TEST_TEMPLATE);
+        }
+
+        /**
+         * Convert this template to a HttpCacheStorageEntry object.
+         * @return HttpCacheStorageEntry object
+         */
+        HttpCacheEntry toEntry() {
+            return new HttpCacheEntry(
+                    requestDate,
+                    responseDate,
+                    statusLine,
+                    responseHeaders,
+                    resource,
+                    variantMap);
+        }
+
+        /**
+         * Create a new template with all null values.
+         */
+        private HttpCacheStorageEntryTestTemplate() {
+        }
+
+        /**
+         * Create a new template values copied from the given template
+         *
+         * @param src Template to copy values from
+         */
+        private HttpCacheStorageEntryTestTemplate(final HttpCacheStorageEntryTestTemplate src) {
+            this.resource = src.resource;
+            this.requestDate = src.requestDate;
+            this.responseDate = src.responseDate;
+            this.statusLine = src.statusLine;
+            this.responseHeaders = src.responseHeaders;
+            this.variantMap = src.variantMap;
+        }
     }
 
     /**
-     * Return the value from a map if it is present, and otherwise a default value.
+     * Template with all default values.
      *
-     * Implementation of map#getOrDefault for Java 6.
-     *
-     * @param map Map to get an entry from
-     * @param key Key to look up
-     * @param orDefault Value to return if the given key is not found.
-     * @param <X> Type of object expected
-     * @return Object from map, or default if not found
+     * Used by HttpCacheStorageEntryTestTemplate#makeDefault()
      */
-    static <X> X getOrDefault(final Map<String, Object> map, final String key, final X orDefault) {
-        if (map.containsKey(key)) {
-            return (X) map.get(key);
-        } else {
-            return orDefault;
-        }
+    private static final HttpCacheStorageEntryTestTemplate DEFAULT_HTTP_CACHE_STORAGE_ENTRY_TEST_TEMPLATE = new HttpCacheStorageEntryTestTemplate();
+    static {
+        DEFAULT_HTTP_CACHE_STORAGE_ENTRY_TEST_TEMPLATE.resource = new HeapResource("Hello World".getBytes(Charset.forName("UTF-8")));
+        DEFAULT_HTTP_CACHE_STORAGE_ENTRY_TEST_TEMPLATE.requestDate = new Date(165214800000L);
+        DEFAULT_HTTP_CACHE_STORAGE_ENTRY_TEST_TEMPLATE.responseDate = new Date(2611108800000L);
+        DEFAULT_HTTP_CACHE_STORAGE_ENTRY_TEST_TEMPLATE.statusLine = new BasicStatusLine(
+                new ProtocolVersion("HTTP", 1, 1),
+                200, "OK");
+        DEFAULT_HTTP_CACHE_STORAGE_ENTRY_TEST_TEMPLATE.responseHeaders = new Header[]{
+                new BasicHeader("Content-type", "text/html"),
+                new BasicHeader("Cache-control", "public, max-age=31536000"),
+        };
+        DEFAULT_HTTP_CACHE_STORAGE_ENTRY_TEST_TEMPLATE.variantMap = Collections.<String, String>emptyMap();
     }
 
     /**
@@ -452,9 +483,9 @@ class MemcachedCacheEntryHttpTestUtils {
                 when(mockInputStream).
                 close();
 
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("resource", mockResource);
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.resource = mockResource;
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         final MemcachedCacheEntryHttp testMemcachedEntry = new MemcachedCacheEntryHttp(storageKey, testEntry);
         try {

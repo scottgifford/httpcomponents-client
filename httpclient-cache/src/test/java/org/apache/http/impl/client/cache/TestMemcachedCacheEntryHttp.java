@@ -30,7 +30,6 @@ package org.apache.http.impl.client.cache;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,7 +52,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.assertCacheEntriesEqual;
-import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.buildSimpleTestObjectFromTemplate;
+import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.HttpCacheStorageEntryTestTemplate;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.makeMockSlowReadInputStream;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.makeMockSlowReadResource;
 import static org.apache.http.impl.client.cache.MemcachedCacheEntryHttpTestUtils.makeTestFileObject;
@@ -98,7 +97,8 @@ public class TestMemcachedCacheEntryHttp {
      */
     @Test
     public void simpleObjectTest() throws Exception {
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(Collections.<String, Object>emptyMap());
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         testWithCache(cacheEntryFactory, TEST_STORAGE_KEY, testEntry);
     }
@@ -110,62 +110,63 @@ public class TestMemcachedCacheEntryHttp {
      */
     @Test
     public void fileObjectTest() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("resource", new FileResource(makeTestFileObject(TEST_CONTENT_FILE_NAME)));
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.resource = new FileResource(makeTestFileObject(TEST_CONTENT_FILE_NAME));
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         testWithCache(cacheEntryFactory, TEST_STORAGE_KEY, testEntry);
     }
 
     @Test
     public void noHeadersTest() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("headers", new Header[0]);
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.responseHeaders = new Header[0];
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         testWithCache(cacheEntryFactory, TEST_STORAGE_KEY, testEntry);
     }
 
     @Test
     public void contentLengthTest() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("headers", new Header[] {
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.responseHeaders = new Header[] {
                 new BasicHeader("Content-Length", "999"),
-        });
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        };
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         testWithCache(cacheEntryFactory, TEST_STORAGE_KEY, testEntry);
     }
 
     @Test
     public void emptyBodyTest() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("resource", new HeapResource(new byte[0]));
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.resource = new HeapResource(new byte[0]);
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         testWithCache(cacheEntryFactory, TEST_STORAGE_KEY, testEntry);
     }
 
     @Test
     public void noBodyTest() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("resource", null);
-        cacheObjectValues.put("statusLine", new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1),
-                204, "No Content"));
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.resource = null;
+        cacheObjectValues.statusLine = new BasicStatusLine(
+                new ProtocolVersion("HTTP", 1, 1),
+                204, "No Content");
 
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         testWithCache(cacheEntryFactory, TEST_STORAGE_KEY, testEntry);
     }
 
     @Test
     public void testSimpleVariantMap() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
         final Map<String, String> variantMap = new HashMap<String, String>();
         variantMap.put("{Accept-Encoding=gzip}","{Accept-Encoding=gzip}https://example.com:1234/foo");
         variantMap.put("{Accept-Encoding=compress}","{Accept-Encoding=compress}https://example.com:1234/foo");
-        cacheObjectValues.put("variantMap", variantMap);
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        cacheObjectValues.variantMap = variantMap;
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         testWithCache(cacheEntryFactory, TEST_STORAGE_KEY, testEntry);
     }
@@ -177,23 +178,25 @@ public class TestMemcachedCacheEntryHttp {
      */
     @Test
     public void testEscapedHeaders() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("headers", new Header[] {
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.responseHeaders = new Header[] {
                 new BasicHeader("hc-test-1", "hc-test-1-value"),
                 new BasicHeader("hc-sk", "hc-sk-value"),
                 new BasicHeader("hc-resp-date", "hc-resp-date-value"),
                 new BasicHeader("hc-req-date-date", "hc-req-date-value"),
                 new BasicHeader("hc-varmap-key", "hc-varmap-key-value"),
                 new BasicHeader("hc-varmap-val", "hc-varmap-val-value"),
-        });
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        };
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         testWithCache(cacheEntryFactory, TEST_STORAGE_KEY, testEntry);
     }
 
     @Test(expected = IllegalStateException.class)
     public void testNullStorageKey() {
-        final MemcachedCacheEntryHttp entry = new MemcachedCacheEntryHttp(null, buildSimpleTestObjectFromTemplate(Collections.<String, Object>emptyMap()));
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
+        final MemcachedCacheEntryHttp entry = new MemcachedCacheEntryHttp(null, testEntry);
         entry.toByteArray();
     }
 
@@ -215,7 +218,8 @@ public class TestMemcachedCacheEntryHttp {
      */
     @Test
     public void simpleTestFromPreviouslySerialized() throws Exception {
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(Collections.<String, Object>emptyMap());
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         verifyHttpCacheEntryFromTestFile(TEST_STORAGE_KEY, testEntry, cacheEntryFactory, SIMPLE_OBJECT_SERIALIZED_NAME, reserializeFiles);
     }
@@ -229,49 +233,49 @@ public class TestMemcachedCacheEntryHttp {
      */
     @Test
     public void fileTestFromPreviouslySerialized() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("resource", new FileResource(makeTestFileObject(TEST_CONTENT_FILE_NAME)));
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.resource = new FileResource(makeTestFileObject(TEST_CONTENT_FILE_NAME));
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         verifyHttpCacheEntryFromTestFile(TEST_STORAGE_KEY, testEntry, cacheEntryFactory, FILE_TEST_SERIALIZED_NAME, reserializeFiles);
     }
 
     @Test
     public void variantMapTestFromPreviouslySerialized() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
         final Map<String, String> variantMap = new HashMap<String, String>();
         variantMap.put("{Accept-Encoding=gzip}","{Accept-Encoding=gzip}https://example.com:1234/foo");
         variantMap.put("{Accept-Encoding=compress}","{Accept-Encoding=compress}https://example.com:1234/foo");
-        cacheObjectValues.put("variantMap", variantMap);
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        cacheObjectValues.variantMap = variantMap;
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         verifyHttpCacheEntryFromTestFile(TEST_STORAGE_KEY, testEntry, cacheEntryFactory, VARIANTMAP_TEST_SERIALIZED_NAME, reserializeFiles);
     }
 
     @Test
     public void escapedHeaderTestFromPreviouslySerialized() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("headers", new Header[] {
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.responseHeaders = new Header[] {
                 new BasicHeader("hc-test-1", "hc-test-1-value"),
                 new BasicHeader("hc-sk", "hc-sk-value"),
                 new BasicHeader("hc-resp-date", "hc-resp-date-value"),
                 new BasicHeader("hc-req-date-date", "hc-req-date-value"),
                 new BasicHeader("hc-varmap-key", "hc-varmap-key-value"),
                 new BasicHeader("hc-varmap-val", "hc-varmap-val-value"),
-        });
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        };
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         verifyHttpCacheEntryFromTestFile(TEST_STORAGE_KEY, testEntry, cacheEntryFactory, ESCAPED_HEADER_TEST_SERIALIZED_NAME, reserializeFiles);
     }
 
     @Test
     public void noBodyTestFromPreviouslySerialized() throws Exception {
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("resource", null);
-        cacheObjectValues.put("statusLine", new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1),
-                204, "No Content"));
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.resource = null;
+        cacheObjectValues.statusLine = new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1),
+                204, "No Content");
 
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         verifyHttpCacheEntryFromTestFile(TEST_STORAGE_KEY, testEntry, cacheEntryFactory, NO_BODY_TEST_SERIALIZED_NAME, reserializeFiles);
     }
@@ -324,9 +328,9 @@ public class TestMemcachedCacheEntryHttp {
         final String testString = "Short Hello";
         final Resource mockResource = makeMockSlowReadResource(testString, 1);
 
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("resource", mockResource);
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.resource = mockResource;
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         final MemcachedCacheEntryHttp testMemcachedEntry = new MemcachedCacheEntryHttp(TEST_STORAGE_KEY, testEntry);
         final byte[] testBytes = testMemcachedEntry.toByteArray();
@@ -348,9 +352,9 @@ public class TestMemcachedCacheEntryHttp {
         // Return 1 byte too many
         Mockito.when(mockResource.length()).thenReturn(Long.valueOf(testString.length() + 1));
 
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("resource", mockResource);
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.resource = mockResource;
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         final MemcachedCacheEntryHttp testMemcachedEntry = new MemcachedCacheEntryHttp(TEST_STORAGE_KEY, testEntry);
         testMemcachedEntry.toByteArray();
@@ -366,9 +370,9 @@ public class TestMemcachedCacheEntryHttp {
         // Return way too many bytes byte too many
         Mockito.when(mockResource.length()).thenReturn(Integer.MAX_VALUE + 1L);
 
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("resource", mockResource);
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.resource = mockResource;
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         final MemcachedCacheEntryHttp testMemcachedEntry = new MemcachedCacheEntryHttp(TEST_STORAGE_KEY, testEntry);
         testMemcachedEntry.toByteArray();
@@ -388,8 +392,8 @@ public class TestMemcachedCacheEntryHttp {
                 when(throwyHttpWriter).
                 write(Mockito.any(HttpResponse.class));
 
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         final MemcachedCacheEntryHttp testMemcachedEntry = new MemcachedCacheEntryHttp(TEST_STORAGE_KEY, testEntry) {
             protected AbstractMessageWriter<HttpResponse> makeHttpResponseWriter(final SessionOutputBuffer outputBuffer) {
@@ -416,9 +420,9 @@ public class TestMemcachedCacheEntryHttp {
         Mockito.when(mockResource.length()).thenReturn(Long.valueOf(10));
         Mockito.when(mockResource.getInputStream()).thenReturn(throwyInputStream);
 
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("resource", mockResource);
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.resource = mockResource;
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         final MemcachedCacheEntryHttp testMemcachedEntry = new MemcachedCacheEntryHttp(TEST_STORAGE_KEY, testEntry);
         testMemcachedEntry.toByteArray();
@@ -507,9 +511,9 @@ public class TestMemcachedCacheEntryHttp {
                 when(mockInputStream).
                 close();
 
-        final Map<String, Object> cacheObjectValues = new HashMap<String, Object>();
-        cacheObjectValues.put("resource", mockResource);
-        final HttpCacheEntry testEntry = buildSimpleTestObjectFromTemplate(cacheObjectValues);
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        cacheObjectValues.resource = mockResource;
+        final HttpCacheEntry testEntry = cacheObjectValues.toEntry();
 
         final MemcachedCacheEntryHttp testMemcachedEntry = new MemcachedCacheEntryHttp(TEST_STORAGE_KEY, testEntry);
         try {
@@ -544,7 +548,9 @@ public class TestMemcachedCacheEntryHttp {
         };
         testMemcachedEntry.set(bytes);
 
-        final HttpCacheEntry expectedEntry = buildSimpleTestObjectFromTemplate(Collections.<String, Object>emptyMap());
+        final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
+        final HttpCacheEntry expectedEntry = cacheObjectValues.toEntry();
+
         assertEquals(TEST_STORAGE_KEY, testMemcachedEntry.getStorageKey());
         assertCacheEntriesEqual(expectedEntry, testMemcachedEntry.getHttpCacheEntry());
     }
