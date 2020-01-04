@@ -499,7 +499,7 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
      * This prevents the Age header from being written to the cache (it does not make sense to cache it),
      * and is the only thing the policy is used for in this case.
      */
-    private class NoAgeCacheValidityPolicy extends CacheValidityPolicy {
+    private static class NoAgeCacheValidityPolicy extends CacheValidityPolicy {
         @Override
         public long getCurrentAgeSecs(final HttpCacheEntry entry, final Date now) {
             return 0L;
