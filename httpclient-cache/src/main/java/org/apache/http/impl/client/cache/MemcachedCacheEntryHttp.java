@@ -201,16 +201,15 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
                     final Date requestDate = getCachePseudoHeaderDateAndRemove(response, SC_HEADER_NAME_REQUEST_DATE);
                     final Date responseDate = getCachePseudoHeaderDateAndRemove(response, SC_HEADER_NAME_RESPONSE_DATE);
                     final boolean noBody = Boolean.parseBoolean(getOptionalCachePseudoHeaderAndRemove(response, SC_HEADER_NAME_NO_CONTENT));
-                    final Map<String, String> variantMap = getVariantMapPseudoHeaderAndRemove(response);
+                    final Map<String, String> variantMap = getVariantMapPseudoHeadersAndRemove(response);
                     unescapeHeaders(response);
-
-                    copyBytes(inputBuffer, bytesOut);
 
                     final Resource resource;
                     if (noBody) {
                         // This means no content, for example a 204 response
                         resource = null;
                     } else {
+                        copyBytes(inputBuffer, bytesOut);
                         resource = new HeapResource(bytesOut.toByteArray());
                     }
                     httpCacheEntry = new HttpCacheEntry(
@@ -379,7 +378,7 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
      * @return Extracted variant map
      * @throws MemcachedCacheEntryHttpException if the given pseudo-header is not found, or contains invalid data
      */
-    private static Map<String, String> getVariantMapPseudoHeaderAndRemove(final HttpResponse response) {
+    private static Map<String, String> getVariantMapPseudoHeadersAndRemove(final HttpResponse response) {
         final Header[] headers = response.getAllHeaders();
         final Map<String, String> variantMap = new HashMap<String, String>(0);
         String lastKey = null;
