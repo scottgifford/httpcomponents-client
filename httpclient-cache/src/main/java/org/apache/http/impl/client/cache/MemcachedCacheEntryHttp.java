@@ -233,9 +233,12 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
     }
 
     /**
-     * Helper method to make a new HttpResponse writer.
+     * Helper method to make a new HTTP response writer.
      *
      * Useful to override for testing.
+     *
+     * @param outputBuffer Output buffer to write to
+     * @return HTTP response writer to write to
      */
     protected AbstractMessageWriter<HttpResponse> makeHttpResponseWriter(final SessionOutputBuffer outputBuffer) {
         return new DefaultHttpResponseWriter(outputBuffer, null);
@@ -245,6 +248,9 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
      * Helper method to make a new ByteArrayInputStream.
      *
      * Useful to override for testing.
+     *
+     * @param bytes Bytes to read from the stream
+     * @return Stream to read the bytes from
      */
     protected InputStream makeByteArrayInputStream(final byte[] bytes) {
         return new ByteArrayInputStream(bytes);
@@ -254,6 +260,9 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
      * Helper method to make a new HttpResponse parser.
      *
      * Useful to override for testing.
+     *
+     * @param inputBuffer Buffer to read from
+     * @return HTTP response parser
      */
     protected AbstractMessageParser<HttpResponse> makeHttpResponseParser(final SessionInputBuffer inputBuffer) {
         return new DefaultHttpResponseParser(inputBuffer);
