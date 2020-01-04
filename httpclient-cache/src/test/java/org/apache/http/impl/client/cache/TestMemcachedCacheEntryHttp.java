@@ -67,15 +67,17 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class TestMemcachedCacheEntryHttp {
-    private static final String FILE_TEST_SERIALIZED_NAME = "ApacheLogo.serialized";
-    private static final String SIMPLE_OBJECT_SERIALIZED_NAME = "simpleObject.serialized";
-    private static final String VARIANTMAP_TEST_SERIALIZED_NAME = "variantMap.serialized";
-    private static final String ESCAPED_HEADER_TEST_SERIALIZED_NAME = "escapedHeader.serialized";
-    private static final String NO_BODY_TEST_SERIALIZED_NAME = "noBody.serialized";
-    private static final String MISSING_HEADER_TEST_SERIALIZED_NAME = "missingHeader.serialized";
-    private static final String INVALID_HEADER_TEST_SERIALIZED_NAME = "invalidHeader.serialized";
-    private static final String VARIANTMAP_MISSING_KEY_TEST_SERIALIZED_NAME = "variantMapMissingKey.serialized";
-    private static final String VARIANTMAP_MISSING_VALUE_TEST_SERIALIZED_NAME = "variantMapMissingValue.serialized";
+    private static final String SERIALIZED = ".serialized";
+
+    private static final String FILE_TEST_SERIALIZED_NAME = "ApacheLogo" + SERIALIZED;
+    private static final String SIMPLE_OBJECT_SERIALIZED_NAME = "simpleObject" + SERIALIZED;
+    private static final String VARIANTMAP_TEST_SERIALIZED_NAME = "variantMap" + SERIALIZED;
+    private static final String ESCAPED_HEADER_TEST_SERIALIZED_NAME = "escapedHeader" + SERIALIZED;
+    private static final String NO_BODY_TEST_SERIALIZED_NAME = "noBody" + SERIALIZED;
+    private static final String MISSING_HEADER_TEST_SERIALIZED_NAME = "missingHeader" + SERIALIZED;
+    private static final String INVALID_HEADER_TEST_SERIALIZED_NAME = "invalidHeader" + SERIALIZED;
+    private static final String VARIANTMAP_MISSING_KEY_TEST_SERIALIZED_NAME = "variantMapMissingKey" + SERIALIZED;
+    private static final String VARIANTMAP_MISSING_VALUE_TEST_SERIALIZED_NAME = "variantMapMissingValue" + SERIALIZED;
 
     private static final String TEST_CONTENT_FILE_NAME = "ApacheLogo.png";
     private static final String TEST_STORAGE_KEY = "xyzzy";
