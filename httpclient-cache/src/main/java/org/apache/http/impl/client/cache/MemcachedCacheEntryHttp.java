@@ -105,6 +105,7 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
             return new TryWithResources<byte[]>(3) {
                 public byte[] run() throws IOException, HttpException {
                     // Fake HTTP request, required by response generator
+                    // Use request method from httpCacheEntry, but as far as I can tell it will only ever return "GET".
                     final HttpRequest httpRequest = new BasicHttpRequest(httpCacheEntry.getRequestMethod(), "/");
                     final HttpRequestWrapper requestWrapper = HttpRequestWrapper.wrap(httpRequest);
 
