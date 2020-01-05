@@ -256,7 +256,7 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
     }
 
     /**
-     * Helper method to make a new HttpResponse parser.
+     * Helper method to make a new HTTP Response parser.
      *
      * Useful to override for testing.
      *
@@ -310,7 +310,7 @@ public class MemcachedCacheEntryHttp implements MemcachedCacheEntry {
         httpResponse.addHeader(SC_HEADER_NAME_RESPONSE_DATE, Long.toString(httpCacheEntry.getResponseDate().getTime()));
         httpResponse.addHeader(SC_HEADER_NAME_REQUEST_DATE, Long.toString(httpCacheEntry.getRequestDate().getTime()));
 
-        // Encode these so everything is in the header value and not the header name
+        // Encode these so map entries are stored in a pair of headers, one for key and one for value.
         // Header keys look like: {Accept-Encoding=gzip}
         // And header values like: {Accept-Encoding=gzip}https://example.com:1234/foo
         for(final Map.Entry<String, String> entry: httpCacheEntry.getVariantMap().entrySet()) {

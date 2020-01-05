@@ -169,10 +169,10 @@ class MemcachedCacheEntryHttpTestUtils {
      * @throws Exception if anything goes wrong
      */
     static void verifyHttpCacheEntryFromBytes(final MemcachedCacheEntryFactory cacheEntryFactory, final String storageKey, final HttpCacheEntry httpCacheEntry, final byte[] testBytes) throws Exception {
-        final MemcachedCacheEntry testMemcachedCacheEntryFromBytes = memcachedCacheEntryFromBytes(cacheEntryFactory, testBytes);
+        final MemcachedCacheEntry testEntry = memcachedCacheEntryFromBytes(cacheEntryFactory, testBytes);
 
-        assertEquals(storageKey, testMemcachedCacheEntryFromBytes.getStorageKey());
-        assertCacheEntriesEqual(httpCacheEntry, testMemcachedCacheEntryFromBytes.getHttpCacheEntry());
+        assertEquals(storageKey, testEntry.getStorageKey());
+        assertCacheEntriesEqual(httpCacheEntry, testEntry.getHttpCacheEntry());
     }
 
     /**
@@ -182,6 +182,7 @@ class MemcachedCacheEntryHttpTestUtils {
      * @param httpCacheEntry    Cache entry to verify
      * @param cacheEntryFactory Deserializer factory
      * @param testFileName  Name of test file to deserialize
+     * @param reserializeFiles If true, test files will be regenerated and saved to disk
      * @throws Exception if anything goes wrong
      */
     static void verifyHttpCacheEntryFromTestFile(final String storageKey, final HttpCacheEntry httpCacheEntry,
@@ -289,9 +290,8 @@ class MemcachedCacheEntryHttpTestUtils {
      *
      * @param testFileName Name of test file
      * @return File for this test file
-     * @throws Exception if anything goes wrong
      */
-    static File makeTestFileObject(final String testFileName) throws Exception {
+    static File makeTestFileObject(final String testFileName) {
         return new File(TEST_RESOURCE_DIR + testFileName);
     }
 
@@ -411,14 +411,15 @@ class MemcachedCacheEntryHttpTestUtils {
                 }
             }
         };
-    };
+    }
 
     /**
      * Copy bytes from the given input stream to the given destination buffer until the buffer is full,
-     * or end-of-file is reached.
+     * or end-of-file is reached, and return the number of bytes read.
      *
      * @param src Input stream to read from
      * @param dest Output buffer to write to
+     * @return Number of bytes read
      * @throws IOException if an I/O error occurs
      */
     private static int readFully(final InputStream src, final byte[] dest) throws IOException {
@@ -440,6 +441,7 @@ class MemcachedCacheEntryHttpTestUtils {
      *
      * @param src Input stream to read from
      * @param length Maximum bytes to read
+     * @return All bytes from file
      * @throws IOException if an I/O error occurs or end-of-file is reached before the requested
      *                     number of bytes have been read
      */

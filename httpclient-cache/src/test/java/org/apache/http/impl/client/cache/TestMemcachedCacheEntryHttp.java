@@ -84,7 +84,7 @@ public class TestMemcachedCacheEntryHttp {
 
     private MemcachedCacheEntryFactory cacheEntryFactory;
 
-    // Manually set this to true to re-generate all of the .serialized files
+    // Manually set this to true to re-generate all of the serialized files
     private final boolean reserializeFiles = false;
 
     @Before
@@ -147,6 +147,11 @@ public class TestMemcachedCacheEntryHttp {
         testWithCache(cacheEntryFactory, TEST_STORAGE_KEY, testEntry);
     }
 
+    /**
+     * Deserialize a cache entry with no body, from a previously saved file.
+     *
+     * @throws Exception if anything goes wrong
+     */
     @Test
     public void noBodyTest() throws Exception {
         final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
@@ -160,6 +165,11 @@ public class TestMemcachedCacheEntryHttp {
         testWithCache(cacheEntryFactory, TEST_STORAGE_KEY, testEntry);
     }
 
+    /**
+     * Serialize and deserialize a cache entry with a variant map.
+     *
+     * @throws Exception if anything goes wrong
+     */
     @Test
     public void testSimpleVariantMap() throws Exception {
         final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
@@ -193,6 +203,11 @@ public class TestMemcachedCacheEntryHttp {
         testWithCache(cacheEntryFactory, TEST_STORAGE_KEY, testEntry);
     }
 
+    /**
+     * Attempt to store a cache entry with a null storage key.
+     *
+     * @throws Exception is expected
+     */
     @Test(expected = IllegalStateException.class)
     public void testNullStorageKey() {
         final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
@@ -241,6 +256,11 @@ public class TestMemcachedCacheEntryHttp {
         verifyHttpCacheEntryFromTestFile(TEST_STORAGE_KEY, testEntry, cacheEntryFactory, FILE_TEST_SERIALIZED_NAME, reserializeFiles);
     }
 
+    /**
+     * Deserialize a cache entry with a variant map, from a previously saved file.
+     *
+     * @throws Exception if anything goes wrong
+     */
     @Test
     public void variantMapTestFromPreviouslySerialized() throws Exception {
         final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
@@ -253,6 +273,11 @@ public class TestMemcachedCacheEntryHttp {
         verifyHttpCacheEntryFromTestFile(TEST_STORAGE_KEY, testEntry, cacheEntryFactory, VARIANTMAP_TEST_SERIALIZED_NAME, reserializeFiles);
     }
 
+    /**
+     * Deserialize a cache entry with headers that use our pseudo-header prefix and need escaping.
+     *
+     * @throws Exception if anything goes wrong
+     */
     @Test
     public void escapedHeaderTestFromPreviouslySerialized() throws Exception {
         final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
@@ -269,6 +294,11 @@ public class TestMemcachedCacheEntryHttp {
         verifyHttpCacheEntryFromTestFile(TEST_STORAGE_KEY, testEntry, cacheEntryFactory, ESCAPED_HEADER_TEST_SERIALIZED_NAME, reserializeFiles);
     }
 
+    /**
+     * Deserialize a cache entry with no body, from a previously saved file.
+     *
+     * @throws Exception if anything goes wrong
+     */
     @Test
     public void noBodyTestFromPreviouslySerialized() throws Exception {
         final HttpCacheStorageEntryTestTemplate cacheObjectValues = HttpCacheStorageEntryTestTemplate.makeDefault();
@@ -281,6 +311,11 @@ public class TestMemcachedCacheEntryHttp {
         verifyHttpCacheEntryFromTestFile(TEST_STORAGE_KEY, testEntry, cacheEntryFactory, NO_BODY_TEST_SERIALIZED_NAME, reserializeFiles);
     }
 
+    /**
+     * Deserialize a cache entry in a bad format, expecting an exception.
+     *
+     * @throws Exception is expected
+     */
     @Test(expected = MemcachedCacheEntryHttpException.class)
     public void testInvalidCacheEntry() throws Exception {
         // This file is a JPEG not a cache entry
@@ -288,6 +323,11 @@ public class TestMemcachedCacheEntryHttp {
         memcachedCacheEntryFromBytes(cacheEntryFactory, bytes);
     }
 
+    /**
+     * Deserialize a cache entry with a missing header, from a previously saved file.
+     *
+     * @throws Exception is expected
+     */
     @Test(expected = MemcachedCacheEntryHttpException.class)
     public void testMissingHeaderCacheEntry() throws Exception {
         // This file is a JPEG not a cache entry
